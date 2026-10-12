@@ -33,6 +33,12 @@
 *.a
 *.lib
 
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.vcxproj.user
+
 # Executables
 *.exe
 *.out
@@ -42,6 +48,23 @@
 build/
 Build/
 build-*/
+
+# Build output
+x64/
+Debug/
+Release/
+build/
+out/
+Intermediate/
+bin/
+obj/
+CMakeFiles/
+CMakeCache.txt
+
+# Misc
+*.log
+*.pdb
+*.ilk
 
 # CMake generated files
 CMakeFiles/
