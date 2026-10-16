@@ -132,14 +132,20 @@
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Level1.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ObjectHandler.cpp" />
+    <ClCompile Include="Pathfinding.cpp" />
     <ClCompile Include="Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Assets.h" />
+    <ClInclude Include="CameraUtils.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Level1.h" />
     <ClInclude Include="Level2.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjectHandler.h" />
+    <ClInclude Include="Pathfinding.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Utensils.h" />
   </ItemGroup>

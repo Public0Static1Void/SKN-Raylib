@@ -19,6 +19,9 @@ void Game::SetScene(std::unique_ptr<Scene> scene)
 }
 
 void Game::Run() {
+	// -- Start --
+	current_scene->Start();
+
 	while (current_scene && !WindowShouldClose()) {
 		// -- Update --
 		current_scene->Update(GetFrameTime());

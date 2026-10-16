@@ -1,17 +1,27 @@
 #pragma once
 #include <raylib.h>
 
-class Transform {
+class ObjectTransform {
 public:
-	Transform() = default;
-	Transform(Vector2 position, Vector2 size)
+	ObjectTransform() = default;
+	ObjectTransform(Vector2 position, Vector2 size)
 		: position(position), size(size) {}
-	Transform(Vector2 position, Vector2 size, float rotation)
+	ObjectTransform(Vector2 position, Vector2 size, int rotation)
 		: position(position), size(size), rotation(rotation) {}
 
-	~Transform() = default;
+	~ObjectTransform() = default;
+
+	static Vector2 DirFromRotation(float rotation) {
+		float rad = rotation * DEG2RAD;
+		return { roundf(sinf(rad)), roundf(-cosf(rad)) };
+	}
+	static float RotationFromDir(Vector2 dir) {
+		float deg = atan2f(dir.x, -dir.y) * RAD2DEG;
+		if (deg < 0) deg += 360;
+		return roundf(deg);
+	}
 
 	Vector2 position{ 0, 0 };
-	Vector2 size{ 0, 0 };
-	float rotation = 0;
+	Vector2 size{ 1, 1 };
+	int rotation = 90;
 };
