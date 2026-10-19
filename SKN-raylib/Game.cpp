@@ -36,7 +36,10 @@ void Game::Run() {
 
 		// -- Scene change --
 		auto next_scene = current_scene->NextScene();
-		if (next_scene != nullptr)
+		if (next_scene != nullptr) {
 			current_scene = std::move(next_scene);
+			current_scene->Start();
+		}
+			
 	}
 }

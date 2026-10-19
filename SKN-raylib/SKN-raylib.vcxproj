@@ -129,25 +129,32 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameOverScene.cpp" />
     <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="InteractiveOverlay.cpp" />
     <ClCompile Include="Level1.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ObjectHandler.cpp" />
     <ClCompile Include="Pathfinding.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="WinScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assets.h" />
     <ClInclude Include="CameraUtils.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameOverScene.h" />
     <ClInclude Include="Grid.h" />
+    <ClInclude Include="InteractiveOverlay.h" />
     <ClInclude Include="Level1.h" />
     <ClInclude Include="Level2.h" />
+    <ClInclude Include="MovableObjects.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectHandler.h" />
     <ClInclude Include="Pathfinding.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Utensils.h" />
+    <ClInclude Include="WinScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

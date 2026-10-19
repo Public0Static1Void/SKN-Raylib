@@ -43,6 +43,16 @@ bool Grid::ScanLevel(const char* fileName)
 					ObjectPosition{ Vector2{(float)j, (float)i}, EntityType::CANNON }
 				);
 				break;
+			case 'c':
+				objects_start_positions.push_back(
+					ObjectPosition{ Vector2{(float)j, (float)i}, EntityType::CRATE }
+				);
+				break;
+			case 'T':
+				objects_start_positions.push_back(
+					ObjectPosition{ Vector2{(float)j, (float)i}, EntityType::TARGET }
+				);
+				break;
 			}
 		}
 	}
@@ -83,8 +93,11 @@ void Grid::DrawGrid(const Assets& assets)
 		}
 		
 	}
-
-	for (auto& p : path) {
-		DrawCircle(p.x + start_draw_position.x, p.y + start_draw_position.y, 1, YELLOW);
+	for (auto& p : searched_tiles) {
+		DrawCircle(p.x + start_draw_position.x, p.y + start_draw_position.y, 3, GREEN);
 	}
+	for (auto& p : path) {
+		DrawCircle(p.x + start_draw_position.x, p.y + start_draw_position.y, 3, YELLOW);
+	}
+	
 }

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <optional>
+#include <functional>
 
 enum class Facing { UP, DOWN, RIGHT, LEFT };
 
@@ -48,19 +49,29 @@ private:
 
 class Object : public LifeSystem {
 public:
-	Object(bool isPlayer, EntityType type, Grid* grid, Color drawColor, int max_life) : isPlayer(isPlayer), type(type), grid(grid), draw_color(drawColor), LifeSystem(max_life) {}
+	Object(bool isPlayer, EntityType type, Grid* grid, Color drawColor, int max_life) 
+		: isPlayer(isPlayer), type(type), grid(grid), draw_color(drawColor), LifeSystem(max_life) 
+	{}
 	virtual ~Object() = default;
 
 	virtual Action Decide(const Vector2& player_pos, ObjectHandler& objectHandler) = 0;
 	virtual void Act(std::vector<std::unique_ptr<Object>>& objects) {
+		if (queued_action.type != Action::Type::NONE) {
+			current_action = queued_action;
+			queued_action.type = Action::Type::NONE;
+		}
+			
 		if (current_action.type == Action::Type::NONE) return;
 
 		switch (current_action.type) {
 		case Action::Type::MOVE: {
 			Vector2 new_pos = objectTransform.position + current_action.dir * grid->tile_size;
 			CollisionInfo hit = ObjectCollision(new_pos, objects);
-			if (hit.collided && hit.collided_object)
+			if (hit.collided && hit.collided_object) {
 				OnCollision(*hit.collided_object);
+				hit.collided_object->OnHit(*this);
+			}
+				
 			else if (grid->IsWalkable(new_pos))
 				objectTransform.position = new_pos;
 			else
@@ -76,6 +87,12 @@ public:
 			else if (objectTransform.rotation >= 360) objectTransform.rotation -= 360;
 			break;}
 		}
+
+		// Avoid repetitive actions
+		current_action.type = Action::Type::NONE;
+
+		// Remove an action if it's an interactable object
+		if (moves_left != -1) moves_left--;
 	}
 
 	void SetPosition(Vector2 pos) {
@@ -120,29 +137,62 @@ public:
 		DrawSprite(assets.tilemap, sprite, dest, objectTransform.rotation);
 	}
 
-	CollisionInfo ObjectCollision(Vector2 collision_pos, std::vector<std::unique_ptr<Object>>& objects) {
+	CollisionInfo ObjectCollision(Vector2 collision_pos, std::vector<std::unique_ptr<Object>>& objects, bool ignoreSelf = true, std::vector<EntityType> excludeTypes = {}) {
+		auto isExcluded = [&](const Object* ob) {
+			for (const EntityType& ex : excludeTypes) {
+				if (ob->type == ex) return true;
+			}
+			return false;
+			};
+
 		for (const auto& ob : objects) {
-			if (!ob->IsAlive()) continue;			// Dead object, skip
-			if (ob->GetId() == GetId()) continue;	// Skip itself
+			if (!ob->IsAlive()) continue; // Dead object, skip
+			if (ignoreSelf && ob->GetId() == GetId()) continue; // Skip itself
+			if (isExcluded(ob.get())) continue; // Skip excluded entity types
 
 			Vector2 diff = collision_pos - ob->objectTransform.position;
-			int dist = (fabsf(diff.x) + fabsf(diff.y)) / grid->tile_size; // Get the distance between the collision point and the other object
 
-			if (dist <= 0)
-				return { true, ob->objectTransform.position, ob->GetId(), ob.get() };
+			int dist = static_cast<int>((std::fabs(diff.x) + std::fabs(diff.y)) / grid->tile_size);
+			if (dist <= 0) {
+				return {
+					true,
+					ob->objectTransform.position,
+					ob->GetId(),
+					ob.get()
+				};
+			}
 		}
-		return { false, {0, 0}, -1, nullptr };
+
+		return { false, { 0, 0 }, -1, nullptr };
 	}
 
 	virtual void OnCollision(Object& other) {}
+	virtual void OnHit(Object& other) {}
 	virtual void OnWallHit() {}
+
+	void QueueAction(Action& ac) { queued_action = ac; }
+	void ExecuteAction(Action& ac, std::vector<std::unique_ptr<Object>>& objects) {
+		if (moves_left == -1 || moves_left > 0) {
+			if (ac.type == Action::Type::MOVE && Vector2Equals(ac.dir, { 0, 0 })) {
+				ac.dir = ObjectTransform::DirFromRotation(objectTransform.rotation);
+			}
+			queued_action = ac;
+			Act(objects);
+		}
+	}
+
+	void SetInteractable(bool in) { is_interactable = in; moves_left = AVALIABLE_MOVES; }
+	bool IsInteractabe() { return is_interactable; }
+
+	void SetMoves(int moves) { moves_left = moves; }
+	const int GetMoves() const { return moves_left; }
 
 	ObjectTransform objectTransform;
 	bool isPlayer = false;
 	EntityType type;
 
 protected:
-	Action current_action;
+	Action current_action, queued_action;
 	Grid* grid;
 	Color draw_color;
 
@@ -158,6 +208,9 @@ protected:
 
 private:
 	int id = -1;
+	bool is_interactable = false;
+	int moves_left = -1;
+	const int AVALIABLE_MOVES = 3;
 };
 
 class PlayerController : public Object {
@@ -184,6 +237,12 @@ public:
 		current_action = ac;
 		return ac;
 	}
+
+	void Die() override {
+		on_die();
+	}
+
+	std::function<void()> on_die;
 };
 
 class EnemyController : public Object {
@@ -203,15 +262,12 @@ public:
 		PathResult result = FindPathBFS(
 			{ objectTransform.position.x + grid->tile_size / 2, objectTransform.position.y + grid->tile_size / 2 },
 			{ player_pos.x + grid->tile_size / 2, player_pos.y + grid->tile_size / 2 },
-			grid
+			grid, objectHandler.Objects()
 		);
 
-		// Check if the player is in attack range
+		// Check if the player is outside the attack range
 		if (result.steps_left >= 0)
 			dir = result.dir;
-		else {
-
-		}
 		
 		ac = SetUpActionType(dir);
 
@@ -227,67 +283,20 @@ public:
 	}
 };
 
-
-class BulletController : public Object {
+class TargetController : public Object {
 public:
-	BulletController(Grid* grid, Color drawColor, int max_life, Vector2 move_direction)
-		: Object(false, EntityType::NONE, grid, drawColor, max_life), move_direction(move_direction)
-	{
-		sprite = Sprite::BULLET;
+	TargetController(Grid* grid, Color drawColor, int max_life) : Object(false, EntityType::TARGET, grid, drawColor, max_life) {
+		sprite = Sprite::TARGET;
 	}
 
 	Action Decide(const Vector2& player_pos, ObjectHandler& objectHandler) override {
-		Action ac = SetUpActionType(move_direction);
-		current_action = ac;
-		return ac;
+		return Action();
 	}
 
-	void OnCollision(Object& other) override {
-		if (other.type == EntityType::ENEMY || other.type == EntityType::PLAYER)
-			other.Damage(1);
-		OnWallHit();
-	}
-	void OnWallHit() override {
-		// Autodestruct
-		SetLife(0);
-	}
-
-private:
-	Vector2 move_direction{ 0, 0 };
-};
-class CannonController : public Object {
-public:
-	CannonController(Grid* grid, Color drawColor, int max_life) : Object(false, EntityType::CANNON, grid, drawColor, max_life)
-	{
-		sprite = Sprite::CANNON;
-	}
-
-	Action Decide(const Vector2& player_pos, ObjectHandler& objectHandler) override {
-		Action ac;
-
-		current_cooldown--;
-		if (current_cooldown <= 0) {
-			// Spawn bullet
-			Vector2 move_dir = ObjectTransform::DirFromRotation(objectTransform.rotation);
-			auto& bullet = objectHandler.Spawn<BulletController>(grid, draw_color, 1, move_dir);
-			bullet.SetPosition(objectTransform.position + move_dir * grid->tile_size);
-			bullet.SetSize(grid->tile_size);
-			current_cooldown = turn_cooldown;
+	void OnHit(Object& other) override {
+		if (other.type == EntityType::BULLET) {
+			on_hit();
 		}
-
-		return ac;
 	}
-
-	void Act(std::vector<std::unique_ptr<Object>>& objects) override {
-
-	}
-
-	void SetTurnCooldown(int new_cooldown) {
-		turn_cooldown = new_cooldown;
-		current_cooldown = new_cooldown;
-	}
-
-private:
-	int turn_cooldown = 3, current_cooldown = 3;
-	bool can_shoot = false;
+	std::function<void()> on_hit;
 };

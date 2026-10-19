@@ -2,10 +2,11 @@
 #include <iostream>
 #include <vector>
 #include <raylib.h>
+#include <string>
 
 class Assets;
 
-enum class EntityType { PLAYER, ENEMY, CANNON, BOX, NONE };
+enum class EntityType { PLAYER, ENEMY, CANNON, CRATE, BULLET, TARGET, NONE };
 
 class Grid
 {
@@ -37,10 +38,12 @@ public:
 
 	Vector2 GetGridOffset() { return start_draw_position; }
 
-	bool IsWalkable(Vector2 position) {
+	bool IsWalkable(Vector2 position, bool log = false) {
+		Vector2 stored_pos = position;
 		position = { position.x / tile_size, position.y / tile_size };
 		if (position.y >= tiles.size() || position.y < 0 || position.x >= tiles[position.y].size() || position.x < 0) return false;
-
+		if (log)
+			std::cout << "Position: " << std::to_string(stored_pos.x) << ", " << std::to_string(stored_pos.y) << " | Tile: " << tiles[position.y][position.x] << std::endl;
 		return tiles[position.y][position.x] != '1';
 	}
 
@@ -55,6 +58,7 @@ public:
 
 	int tile_size = 100;
 	std::vector<Vector2> path;
+	std::vector<Vector2> searched_tiles;
 private:
 	Vector2 start_draw_position{ 0, 0 };
 
