@@ -3,6 +3,7 @@
 #include <memory>
 #include <utility>
 class Object;
+enum class EntityType;
 
 class ObjectHandler
 {
@@ -20,6 +21,8 @@ public:
 	}
 
 	void EndTurn();
+
+	void RemoveType(EntityType type);
 
 	std::vector<std::unique_ptr<Object>>& Objects() { return objects; }
 private:

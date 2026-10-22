@@ -4,11 +4,13 @@
 #include "Pathfinding.h"
 #include "ObjectHandler.h"
 #include "Assets.h"
+#include "Animator.h"
 #include <raymath.h>
 #include <iostream>
 #include <string>
 #include <optional>
 #include <functional>
+#include <algorithm>
 
 enum class Facing { UP, DOWN, RIGHT, LEFT };
 
@@ -56,6 +58,8 @@ public:
 
 	virtual Action Decide(const Vector2& player_pos, ObjectHandler& objectHandler) = 0;
 	virtual void Act(std::vector<std::unique_ptr<Object>>& objects) {
+		if (anim.IsAnimating()) return;
+
 		if (queued_action.type != Action::Type::NONE) {
 			current_action = queued_action;
 			queued_action.type = Action::Type::NONE;
@@ -71,20 +75,18 @@ public:
 				OnCollision(*hit.collided_object);
 				hit.collided_object->OnHit(*this);
 			}
-				
+
 			else if (grid->IsWalkable(new_pos))
-				objectTransform.position = new_pos;
+				AnimateTo(new_pos, DEFAULT_MOVE_DURATION, Easing::OutQuad);
 			else
 				OnWallHit();
 
 			// Rotate the object to face the movement direction
-			objectTransform.rotation = ObjectTransform::RotationFromDir(current_action.dir);
+			AnimateRotation(ObjectTransform::RotationFromDir(current_action.dir), DEFAULT_MOVE_DURATION, Easing::OutQuad);
+
 			break;}
 		case Action::Type::ROTATE:{
-			objectTransform.rotation += current_action.degrees;
-			// Make the rotation loop on 360
-			if (objectTransform.rotation < 0) objectTransform.rotation += 360;
-			else if (objectTransform.rotation >= 360) objectTransform.rotation -= 360;
+			AnimateRotation(objectTransform.rotation + current_action.degrees, DEFAULT_MOVE_DURATION, Easing::OutQuad);
 			break;}
 		}
 
@@ -95,7 +97,12 @@ public:
 		if (moves_left != -1) moves_left--;
 	}
 
+	void UpdateMovement(float deltaTime) {
+		anim.Update(deltaTime, objectTransform);
+	}
+
 	void SetPosition(Vector2 pos) {
+		if (is_moving) return;
 		objectTransform.position = pos;
 	}
 	void SetPosition(int x, int y) {
@@ -122,10 +129,6 @@ public:
 
 		Vector2 pos = objectTransform.position + grid->GetGridOffset();
 		Vector2& size = objectTransform.size;
-
-		// Center the rectangle on the tile
-		float size_diff = grid->tile_size - (size.x + size.y) / 2.0f;
-		pos += size / (grid->tile_size / size_diff);
 
 		Rectangle dest = {
 			pos.x + (grid->tile_size - size.x) / 2.0f,
@@ -167,7 +170,13 @@ public:
 	}
 
 	virtual void OnCollision(Object& other) {}
-	virtual void OnHit(Object& other) {}
+	virtual void OnHit(Object& other) {
+		if (other.type == EntityType::BULLET) {
+			AnimateSize(objectTransform.size * 1.4f, 0.35f, Easing::OutBack, true,
+				[this] { if (on_hit) on_hit(); }
+			);
+		}
+	}
 	virtual void OnWallHit() {}
 
 	void QueueAction(Action& ac) { queued_action = ac; }
@@ -187,10 +196,26 @@ public:
 	void SetMoves(int moves) { moves_left = moves; }
 	const int GetMoves() const { return moves_left; }
 
+	void AnimateTo(Vector2 target_pos, float duration, EaseFn fn, bool returns = false, std::function<void()> end_event = nullptr) {
+		if (!anim.IsMoving())
+			anim.MoveTo(objectTransform.position, target_pos, duration, fn, returns, end_event);
+	}
+	void AnimateSize(Vector2 target_size, float duration, EaseFn fn, bool returns = false, std::function<void()> end_event = nullptr) {
+		if (!anim.IsScaling())
+			anim.ScaleTo(objectTransform.size, target_size, duration, fn, returns, end_event);
+	}
+	void AnimateRotation(float target_rotation, float duration, EaseFn fn, bool returns = false, std::function<void()> end_event = nullptr) {
+		if (!anim.IsRotating())
+			anim.RotateTo(objectTransform.rotation, target_rotation, duration, fn, returns, end_event);
+	}
+
 	ObjectTransform objectTransform;
 	bool isPlayer = false;
 	EntityType type;
 
+	static constexpr int AVALIABLE_MOVES = 3;
+
+	std::function<void()> on_hit;
 protected:
 	Action current_action, queued_action;
 	Grid* grid;
@@ -205,98 +230,15 @@ protected:
 	}
 
 	Sprite sprite = Sprite::LAST_NO_USE;
+	
+	bool is_moving = false;
 
 private:
 	int id = -1;
 	bool is_interactable = false;
 	int moves_left = -1;
-	const int AVALIABLE_MOVES = 3;
+
+	const float DEFAULT_MOVE_DURATION = 0.5f;
+	Animator anim;
 };
 
-class PlayerController : public Object {
-public:
-	// This class will always be the player
-	PlayerController(Grid* grid, Color drawColor, int max_life) : Object(true, EntityType::PLAYER, grid, drawColor, max_life) 
-	{
-		sprite = Sprite::PLAYER;
-	}
-
-	Action Decide(const Vector2& player_pos, ObjectHandler& objectHandler) override {
-		Action ac;
-		// Stop the logic if the object is dead
-		if (!IsAlive()) return ac;
-
-		Vector2 dir{0, 0};
-		if (IsKeyPressed(KEY_A)) dir.x = -1;
-		if (IsKeyPressed(KEY_D)) dir.x = 1;
-		if (IsKeyPressed(KEY_W)) dir.y = -1;
-		if (IsKeyPressed(KEY_S)) dir.y = 1;
-
-		ac = SetUpActionType(dir);
-
-		current_action = ac;
-		return ac;
-	}
-
-	void Die() override {
-		on_die();
-	}
-
-	std::function<void()> on_die;
-};
-
-class EnemyController : public Object {
-public:
-	EnemyController(Grid* grid, Color drawColor, int max_life) : Object(false, EntityType::ENEMY, grid, drawColor, max_life)
-	{
-		sprite = Sprite::ENEMY;
-	}
-
-	Action Decide(const Vector2& player_pos, ObjectHandler& objectHandler) override {
-		Action ac;
-		// Stop the logic if the object is dead
-		if (!IsAlive()) return ac;
-
-		Vector2 dir{0, 0};
-
-		PathResult result = FindPathBFS(
-			{ objectTransform.position.x + grid->tile_size / 2, objectTransform.position.y + grid->tile_size / 2 },
-			{ player_pos.x + grid->tile_size / 2, player_pos.y + grid->tile_size / 2 },
-			grid, objectHandler.Objects()
-		);
-
-		// Check if the player is outside the attack range
-		if (result.steps_left >= 0)
-			dir = result.dir;
-		
-		ac = SetUpActionType(dir);
-
-		current_action = ac;
-		return ac;
-	}
-
-	void OnCollision(Object& other) override {
-		std::cout << "Enemy attempting damage" << std::endl;
-		if (other.type == EntityType::PLAYER) {
-			other.Damage(1);
-		}
-	}
-};
-
-class TargetController : public Object {
-public:
-	TargetController(Grid* grid, Color drawColor, int max_life) : Object(false, EntityType::TARGET, grid, drawColor, max_life) {
-		sprite = Sprite::TARGET;
-	}
-
-	Action Decide(const Vector2& player_pos, ObjectHandler& objectHandler) override {
-		return Action();
-	}
-
-	void OnHit(Object& other) override {
-		if (other.type == EntityType::BULLET) {
-			on_hit();
-		}
-	}
-	std::function<void()> on_hit;
-};

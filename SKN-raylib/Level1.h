@@ -1,16 +1,17 @@
 #pragma once
 #include "Scene.h"
 
-#include "Level2.h"
 #include "WinScene.h"
 #include "GameOverScene.h"
 #include "Object.h"
+#include "ObjectControllers.h"
 #include "MovableObjects.h"
 #include "InteractiveOverlay.h"
 #include "Grid.h"
 #include "ObjectHandler.h"
 #include "Assets.h"
 #include "CameraUtils.h"
+#include "MenuUI.h"
 
 #include <raylib.h>
 #include <vector>
@@ -78,23 +79,13 @@ public:
 			std::rotate(objects.begin(), it, it + 1);
 		}
 
-		for (int i = 0; i < objects.size(); i++) {
-			objects[i]->SetSize(grid.tile_size);
-			for (int j = 0; j < positions.size(); j++) {
-				if (objects[i]->type == positions[j].type) {
-					objects[i]->SetPosition(positions[j].position * grid.tile_size);
-					// Deassign the position type so other objects can assign it to themselves
-					positions[j].type = EntityType::NONE;
-					break;
-				}
-			}
-		}
+		RestartScene(positions, objects);
 
-		SetNextScene<Level2>();
+		InitUI();
 	}
 
 	void Update(float deltaTime) override {
-		changeScene = IsKeyPressed(KEY_SPACE);
+		menuUI.button.Update();
 
 		auto& objects = objectHandler.Objects();
 
@@ -118,19 +109,25 @@ public:
 			}
 		}
 
+		bool end_decide_logic = false;
 		for (auto& ob : objects) {
-			Action ac = ob->Decide(player_ptr->objectTransform.position, objectHandler);
-			// If the object is the player and he isn't moving then end the logic
-			if (ob->isPlayer && ac.type == Action::Type::NONE) return;
+			if (!end_decide_logic) {
+				Action ac = ob->Decide(player_ptr->objectTransform.position, objectHandler);
+				// If the object is the player and he isn't moving then end the logic
+				if (ob->isPlayer && ac.type == Action::Type::NONE
+					&& !IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) end_decide_logic = true;
 
-			ob->Act(objects);
+				ob->Act(objects);
+			}
+
+			ob->UpdateMovement(deltaTime);
 		}
 		objectHandler.EndTurn();
 	}
 
 	void Render() override {
 		camera = MakeFitCamera(grid.GetBounds());
-
+		
 		BeginMode2D(camera);
 		grid.DrawGrid(assets);
 		for (auto& ob : objectHandler.Objects()) {
@@ -138,14 +135,35 @@ public:
 		}
 
 		overlay.DrawOverlay(assets, grid, interacted_object);
+		
 		EndMode2D();
 
 		DrawText("Level 1 Scene", 0, 0, 10, GREEN);
+		menuUI.Render(assets);
 	}
 
 	std::unique_ptr<Scene> NextScene() override {
-		if (!changeScene || !next_scene_factory) return nullptr;
+		if (!next_scene_factory) return nullptr;
 		return next_scene_factory();
+	}
+
+	void RestartScene(std::vector<Grid::ObjectPosition> positions, std::vector<std::unique_ptr<Object>>& objects) {
+		for (int i = 0; i < objects.size(); i++) {
+			objects[i]->SetSize(grid.tile_size);
+			for (int j = 0; j < positions.size(); j++) {
+				if (objects[i]->type == positions[j].type) {
+					// Restore the avaliable moves on interactable objects
+					if (objects[i]->IsInteractabe())
+						objects[i]->SetMoves(Object::AVALIABLE_MOVES);
+
+					objects[i]->AnimateRotation(90, 1, Easing::OutBack);
+					objects[i]->AnimateTo(positions[j].position * grid.tile_size, 1, Easing::OutBack);
+					// Deassign the position type so other objects can assign it to themselves
+					positions[j].type = EntityType::NONE;
+					break;
+				}
+			}
+		}
 	}
 private:
 	bool changeScene = false;
@@ -154,8 +172,6 @@ private:
 	void SetNextScene() {
 		next_scene_factory = [] { return std::make_unique<T>(); };
 	}
-
-	std::vector<std::unique_ptr<Object>> objects;
 	
 	Grid grid;
 	ObjectHandler objectHandler;
@@ -167,6 +183,8 @@ private:
 	Camera2D camera{};
 	InteractiveOverlay overlay;
 	Object* interacted_object;
+
+	MenuUI menuUI;
 
 	Object* FindById(int id) {
 		for (auto& ob : objectHandler.Objects()) {
@@ -187,5 +205,12 @@ private:
 				return ob.get();
 		}
 		return nullptr;
+	}
+
+	void InitUI() {
+		menuUI.button.on_click = [this]() { 
+			objectHandler.RemoveType(EntityType::BULLET);
+			RestartScene(grid.GetStartPositions(), objectHandler.Objects());
+		};
 	}
 };

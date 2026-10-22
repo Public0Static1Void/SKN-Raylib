@@ -13,18 +13,30 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Archivos de encabezado\Animation">
+      <UniqueIdentifier>{20408db1-819c-42c8-8158-064a1847f283}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Scenes">
+      <UniqueIdentifier>{2541d8b9-f70b-4521-8ef1-99aef9662a49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\UI">
+      <UniqueIdentifier>{343aded4-ea99-4303-8ab0-cc75c35f7e88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\UI">
+      <UniqueIdentifier>{d79a00e8-94fb-4920-8499-71d9e83e5197}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Scenes">
+      <UniqueIdentifier>{39887a0a-8451-4d6f-9a45-b14f21990b11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Objects">
+      <UniqueIdentifier>{ffeec243-d316-49cf-ac95-48db7784e139}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="Game.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="Level1.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="Grid.cpp">
@@ -37,26 +49,20 @@
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="InteractiveOverlay.cpp">
-      <Filter>Archivos de origen</Filter>
+      <Filter>Archivos de origen\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Archivos de origen\Scenes</Filter>
     </ClCompile>
     <ClCompile Include="WinScene.cpp">
-      <Filter>Archivos de origen</Filter>
+      <Filter>Archivos de origen\Scenes</Filter>
     </ClCompile>
     <ClCompile Include="GameOverScene.cpp">
-      <Filter>Archivos de origen</Filter>
+      <Filter>Archivos de origen\Scenes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Scene.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Game.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Level1.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Level2.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="Utensils.h">
@@ -68,29 +74,50 @@
     <ClInclude Include="Pathfinding.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectHandler.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Assets.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="CameraUtils.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="InteractiveOverlay.h">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="Tween.h">
+      <Filter>Archivos de encabezado\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="MovableObjects.h">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="Animator.h">
+      <Filter>Archivos de encabezado\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="GameOverScene.h">
-      <Filter>Archivos de encabezado</Filter>
+    <ClInclude Include="Level1.h">
+      <Filter>Archivos de encabezado\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Archivos de encabezado\Scenes</Filter>
     </ClInclude>
     <ClInclude Include="WinScene.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Archivos de encabezado\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="GameOverScene.h">
+      <Filter>Archivos de encabezado\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuUI.h">
+      <Filter>Archivos de encabezado\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="InteractiveOverlay.h">
+      <Filter>Archivos de encabezado\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>Archivos de encabezado\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectHandler.h">
+      <Filter>Archivos de encabezado\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Archivos de encabezado\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="MovableObjects.h">
+      <Filter>Archivos de encabezado\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectControllers.h">
+      <Filter>Archivos de encabezado\Objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

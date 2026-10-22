@@ -18,8 +18,14 @@ public:
 	}
 	static float RotationFromDir(Vector2 dir) {
 		float deg = atan2f(dir.x, -dir.y) * RAD2DEG;
-		if (deg < 0) deg += 360;
+		deg = fmodf(fmodf(deg, 360.0f) + 360.0f, 360.0f);
 		return roundf(deg);
+	}
+	static inline float ShortestAngleDelta(float from, float to) {
+		float d = fmodf(to - from, 360.0f);
+		if (d > 180.0f) d -= 360.0f;
+		else if (d < -180.0f) d += 360.0f;
+		return d;
 	}
 
 	Vector2 position{ 0, 0 };

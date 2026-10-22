@@ -22,7 +22,12 @@ public:
 	}
 	void OnWallHit() override {
 		// Autodestruct
-		SetLife(0);
+		AnimateTo(objectTransform.position + move_direction * (grid->tile_size / 2), 0.15f, Easing::Linear, false,
+			[this]() { 
+				AnimateSize({ 0, 0 }, 0.25f, Easing::OutQuad, false, [this]() {
+					SetLife(0);
+					});
+			});
 	}
 
 private:
@@ -37,15 +42,18 @@ public:
 
 	Action Decide(const Vector2& player_pos, ObjectHandler& objectHandler) override {
 		Action ac;
-
-		current_cooldown--;
-		if (current_cooldown <= 0) {
-			// Spawn bullet
-			Vector2 move_dir = ObjectTransform::DirFromRotation(objectTransform.rotation);
-			auto& bullet = objectHandler.Spawn<BulletController>(grid, draw_color, 1, move_dir);
-			bullet.SetPosition(objectTransform.position + move_dir * grid->tile_size);
-			bullet.SetSize(grid->tile_size);
-			current_cooldown = turn_cooldown;
+		if (!is_moving)
+		{
+			current_cooldown--;
+			if (current_cooldown <= 0) {
+				// Spawn bullet
+				Vector2 move_dir = ObjectTransform::DirFromRotation(objectTransform.rotation);
+				auto& bullet = objectHandler.Spawn<BulletController>(grid, draw_color, 1, move_dir);
+				bullet.SetPosition(objectTransform.position + move_dir * (grid->tile_size / 2));
+				bullet.AnimateTo(objectTransform.position + move_dir * grid->tile_size, 0.5f, Easing::OutQuad);
+				bullet.AnimateSize({ (float)grid->tile_size, (float)grid->tile_size }, 0.25f, Easing::OutBack);
+				current_cooldown = turn_cooldown;
+			}
 		}
 		current_action = ac;
 		return ac;

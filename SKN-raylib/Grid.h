@@ -34,6 +34,7 @@ public:
 				return objects_start_positions[i].position;
 			}
 		}
+		return { 0, 0 };
 	}
 
 	Vector2 GetGridOffset() { return start_draw_position; }

@@ -19,3 +19,12 @@ void ObjectHandler::EndTurn() {
 		objects.end()
 	);
 }
+
+void ObjectHandler::RemoveType(EntityType type) {
+	pending.clear();
+
+	objects.erase(std::remove_if(objects.begin(), objects.end(),
+		[type](const std::unique_ptr<Object>& ob) { return ob->type == type; }),
+		objects.end()
+	);
+}
