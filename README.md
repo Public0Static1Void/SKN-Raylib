@@ -18,7 +18,7 @@ Skeleton To Nigromant started as an [Unreal Engine 5 game](https://epicpantss.it
 
 You are a skeleton in a small dungeon. The world only moves when you do, so every step matters. Change the layout of the dungeon to your liking or make enemies fall on traps!
 
-[![Watch the gameplay video!](https://img.youtube.com/vi/-JVyYanbBE8/maxresdefault.jpg)](https://www.youtube.com/watch?v=-JVyYanbBE8)
+[Watch the gameplay video!](https://www.youtube.com/watch?v=-JVyYanbBE8)
 
 ## Gameplay
 
