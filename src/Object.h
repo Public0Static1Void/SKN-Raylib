@@ -79,11 +79,10 @@ public:
 		case Action::Type::MOVE: {
 			Vector2 new_pos = objectTransform.position + current_action.dir * grid->tile_size;
 			CollisionInfo hit = ObjectCollision(new_pos, objects);
-			if (hit.collided && hit.collided_object) {
+			if (hit.collided && hit.collided_object && hit.collided_object->type != EntityType::BULLET) {
 				OnCollision(*hit.collided_object);
 				hit.collided_object->OnHit(*this);
 			}
-
 			else if (grid->IsWalkable(new_pos, type != EntityType::BULLET)) {
 				AnimateTo(new_pos, DEFAULT_MOVE_DURATION, Easing::OutQuad);
 				action_succeeded = true;

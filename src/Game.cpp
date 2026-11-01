@@ -25,8 +25,6 @@ bool LogInitSceneError() {
 	return false;
 }
 
-bool start = false;
-
 bool Game::Run() {
 	// -- Start --
 	if (!current_scene->Start()) {
@@ -36,8 +34,7 @@ bool Game::Run() {
 	while (current_scene && !WindowShouldClose()) {
 		
 		// -- Update --
-		if (start)
-			current_scene->Update(GetFrameTime());
+		current_scene->Update(GetFrameTime());
 
 		// -- Render --
 		BeginDrawing();
@@ -46,11 +43,6 @@ bool Game::Run() {
 		current_scene->Render();
 
 		EndDrawing();
-
-		if (!start) {
-			start = IsKeyDown(KEY_P);
-			continue;
-		}
 
 		// -- Scene change --
 		auto next_scene = current_scene->NextScene();
