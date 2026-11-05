@@ -17,7 +17,7 @@ public:
 
 	void OnCollision(Object& other) override {
 		if (other.type == EntityType::ENEMY || other.type == EntityType::PLAYER)
-			other.Damage(1);
+			other.GetLifeSystem()->Damage(1);
 		OnWallHit();
 	}
 	void OnWallHit() override {
@@ -25,7 +25,7 @@ public:
 		AnimateTo(objectTransform.position + move_direction * (grid->tile_size / 2), 0.15f, Easing::Linear, false,
 			[this]() { 
 				AnimateSize({ 0, 0 }, 0.25f, Easing::OutQuad, false, [this]() {
-					SetLife(0);
+					GetLifeSystem()->SetLife(0);
 					});
 			});
 	}

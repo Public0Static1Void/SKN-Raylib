@@ -41,7 +41,7 @@ private:
 		const Vector2 playerPos = grid->SnapToTile(player.objectTransform.position);
 		auto& objects = objectHandler.Objects();
 		for (auto& ob : objects) {
-			if (!ob->IsAlive() || ob.get() == &player) continue;
+			if (!ob->GetLifeSystem()->IsAlive() || ob.get() == &player) continue;
 
 			ob->Decide(playerPos, objectHandler);
 			ob->Act(objects);
@@ -50,7 +50,7 @@ private:
 
 	static bool AnyAnimating(std::vector<std::unique_ptr<Object>>& objects) {
 		for (auto& ob : objects) {
-			if (ob->IsAlive() && ob->IsAnimating()) return true;
+			if (ob->GetLifeSystem()->IsAlive() && ob->IsAnimating()) return true;
 		}
 		return false;
 	}

@@ -39,5 +39,5 @@ private:
 
 	Vector2 anchor_pos{0, 0};
 
-	SoundManager* soundManager;
+	SoundManager* soundManager = nullptr;
 };

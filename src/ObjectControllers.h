@@ -13,7 +13,7 @@ public:
 	Action Decide(const Vector2& player_pos, ObjectHandler& objectHandler) override {
 		Action ac;
 		// Stop the logic if the object is dead
-		if (!IsAlive() || IsAnimating()) return ac;
+		if (!GetLifeSystem()->IsAlive() || IsAnimating()) return ac;
 
 		Vector2 dir{ 0, 0 };
 		if (IsKeyPressed(KEY_A)) dir.x = -1;
@@ -47,7 +47,7 @@ public:
 	Action Decide(const Vector2& player_pos, ObjectHandler& objectHandler) override {
 		Action ac;
 		// Stop the logic if the object is dead or animating
-		if (!IsAlive() || IsAnimating()) return ac;
+		if (!GetLifeSystem()->IsAlive() || IsAnimating()) return ac;
 
 		Vector2 dir{ 0, 0 };
 
@@ -66,7 +66,7 @@ public:
 
 	void OnCollision(Object& other) override {
 		if (other.type == EntityType::PLAYER) {
-			other.Damage(1);
+			other.GetLifeSystem()->Damage(1);
 		}
 	}
 };

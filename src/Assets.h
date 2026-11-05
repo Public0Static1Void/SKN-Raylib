@@ -4,7 +4,7 @@
 enum class Sprite { PLAYER, ENEMY, CANNON, BULLET, WALL, FLOOR, CRATE, UI_BASE, UI_MOVE, UI_ROTATE, TARGET, DOOR, LAST_NO_USE };
 constexpr int SPRITE_SIZE = 32;
 
-inline void DrawSprite(const Texture2D& tex, Sprite s, Rectangle dest, float rotation = 0, Color tint = WHITE) {
+inline void DrawSprite(const Texture2D& tex, Sprite s, const Rectangle& dest, float rotation = 0, Color tint = WHITE) {
 	const int columns = tex.width / SPRITE_SIZE;
 	const int index = (int)s;
 	Rectangle src = { (float)(index % columns) * SPRITE_SIZE, (float)(index / columns) * SPRITE_SIZE, (float)SPRITE_SIZE, (float)SPRITE_SIZE};

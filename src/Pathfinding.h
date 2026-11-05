@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <vector>
 #include <iostream>
+#include <memory>
 
 class Grid;
 class Object;

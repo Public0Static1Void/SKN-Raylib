@@ -33,7 +33,8 @@ int InteractiveOverlay::GetClickedOption(const Vector2& mouse_world, const Grid&
 			return i;
 		}
 	}
-	soundManager->PlayStoredSound(SoundManager::SoundType::UI_ERROR);
+	if (soundManager != nullptr)
+		soundManager->PlayStoredSound(SoundManager::SoundType::UI_ERROR);
 	return -1;
 }
 

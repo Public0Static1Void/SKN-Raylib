@@ -22,12 +22,6 @@ struct Action {
 	int degrees = 0; // For rotations
 };
 class Object;
-struct CollisionInfo {
-	bool collided = false;
-	Vector2 collision_point{ 0, 0 };
-	int collided_object_id = -1;
-	Object* collided_object = nullptr;
-};
 
 class LifeSystem {
 public:
@@ -55,10 +49,10 @@ private:
 	int max_life = 3, life = 3;
 };
 
-class Object : public LifeSystem {
+class Object {
 public:
 	Object(bool isPlayer, EntityType type, Grid* grid, Color drawColor, int max_life) 
-		: isPlayer(isPlayer), type(type), grid(grid), draw_color(drawColor), LifeSystem(max_life)
+		: isPlayer(isPlayer), type(type), grid(grid), draw_color(drawColor), lifeSystem(max_life)
 	{}
 	virtual ~Object() = default;
 
@@ -78,7 +72,7 @@ public:
 		switch (current_action.type) {
 		case Action::Type::MOVE: {
 			Vector2 new_pos = objectTransform.position + current_action.dir * grid->tile_size;
-			CollisionInfo hit = ObjectCollision(new_pos, objects);
+			CollisionInfo hit = ObjectHandler::ObjectCollision(new_pos, *this, objects);
 			if (hit.collided && hit.collided_object && hit.collided_object->type != EntityType::BULLET) {
 				OnCollision(*hit.collided_object);
 				hit.collided_object->OnHit(*this);
@@ -92,9 +86,7 @@ public:
 
 			// Rotate the object to face the movement direction
 			AnimateRotation(ObjectTransform::RotationFromDir(current_action.dir), DEFAULT_MOVE_DURATION, Easing::OutQuad);
-			// Play a move sound if the object is terrestrial
-			//if (terrestrial)
-				//soundManager->PlayStoredSound(SoundManager::SoundType::MOVE);
+
 			if (on_move) on_move();
 			break;}
 		case Action::Type::ROTATE:{
@@ -114,6 +106,13 @@ public:
 		// Remove an action if it's an interactable object
 		if (moves_left != -1 && action_succeeded) moves_left--;
 	}
+
+	LifeSystem* GetLifeSystem() { return &lifeSystem; }
+	const LifeSystem* GetLifeSystem() const { return &lifeSystem; }
+
+	Grid* GetGrid() { return grid; }
+
+	Sprite GetSprite() const { return sprite; }
 
 	void UpdateMovement(float deltaTime) {
 		anim.Update(deltaTime, objectTransform);
@@ -142,52 +141,6 @@ public:
 	void SetId(int new_id) { id = new_id; }
     int GetId() const { 
 		return id;
-	}
-
-	void DrawObject(const Assets& assets) {
-		if (!IsAlive() || !can_render) return;
-
-		Vector2 pos = objectTransform.position + grid->GetGridOffset();
-		Vector2& size = objectTransform.size;
-
-		Rectangle dest = {
-			pos.x + (grid->tile_size - size.x) / 2.0f,
-			pos.y + (grid->tile_size - size.y) / 2.0f,
-			size.x, size.y
-		};
-		
-		//DrawRectangle(pos.x, pos.y, size.x, size.y, draw_color);
-		DrawSprite(assets.tilemap, sprite, dest, objectTransform.rotation);
-	}
-
-	CollisionInfo ObjectCollision(Vector2 collision_pos, std::vector<std::unique_ptr<Object>>& objects, bool ignoreSelf = true, std::vector<EntityType> excludeTypes = {}) {
-		auto isExcluded = [&](const Object* ob) {
-			for (const EntityType& ex : excludeTypes) {
-				if (ob->type == ex) return true;
-			}
-			return false;
-			};
-
-		for (const auto& ob : objects) {
-			if (!ob->IsAlive()) continue;
-			if (ignoreSelf && ob->GetId() == GetId()) continue; // Skip itself
-			if (isExcluded(ob.get())) continue; // Skip excluded entity types
-
-			Vector2 diff = collision_pos - ob->objectTransform.position;
-
-			int dist = static_cast<int>((std::fabs(diff.x) + std::fabs(diff.y)) / grid->tile_size);
-			if (dist <= 0) {
-				if (!ob->GetCanCollide()) ob->OnHit(*this);
-				return {
-					true,
-					ob->objectTransform.position,
-					ob->GetId(),
-					ob.get()
-				};
-			}
-		}
-
-		return { false, { 0, 0 }, -1, nullptr };
 	}
 
 	virtual void OnCollision(Object& other) {}
@@ -239,6 +192,8 @@ public:
 
 	std::function<void()> on_hit, on_move, on_rotate;
 
+	const bool GetCanRender() const { return can_render; }
+
 protected:
 	Action current_action, queued_action;
 	Grid* grid;
@@ -255,7 +210,6 @@ protected:
 	void SetCanCollide(bool v) { can_collide = v; }
 	const bool GetCanCollide() const { return can_collide; }
 	void SetCanRender(bool v) { can_render = v; }
-	const bool GetCanRender() const { return can_render; }
 
 	Sprite sprite = Sprite::LAST_NO_USE;
 	
@@ -268,4 +222,6 @@ private:
 	Animator anim;
 
 	bool can_collide = true, can_render = true;
+
+	LifeSystem lifeSystem;
 };

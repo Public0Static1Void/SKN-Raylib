@@ -13,7 +13,7 @@ FetchContent_Declare(raylib
 FetchContent_MakeAvailable(raylib)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
-add_executable(skn ${SOURCES} "src/SoundDisplayer.h" "src/SoundManager.h" "src/TurnManager.h" "src/Levels.h")
+add_executable(skn ${SOURCES} "src/SoundDisplayer.h" "src/SoundManager.h" "src/TurnManager.h" "src/Levels.h" "src/ObjectRenderer.h")
 target_include_directories(skn PRIVATE src)
 target_link_libraries(skn PRIVATE raylib)
 

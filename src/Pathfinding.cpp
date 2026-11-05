@@ -31,7 +31,7 @@ PathResult FindPathBFS(Vector2 start, Vector2 end, Grid* grid, std::vector<std::
 		if (walkable)
 			for (const auto& ob : objects) {
 				Vector2 coll_pos = { p.x - grid->tile_size / 2, p.y - grid->tile_size / 2 };
-				CollisionInfo hit = ob->ObjectCollision(coll_pos, objects, false, { EntityType::PLAYER });
+				CollisionInfo hit = ObjectHandler::ObjectCollision(coll_pos, *ob, objects, false, { EntityType::PLAYER });
 				if (hit.collided) {
 					walkable = false;
 					break;

@@ -15,6 +15,7 @@
 #include "MenuUI.h"
 #include "SoundManager.h"
 #include "TurnManager.h"
+#include "ObjectRenderer.h"
 
 #include <raylib.h>
 #include <vector>
@@ -121,9 +122,7 @@ public:
 		
 		BeginMode2D(camera);
 		grid.DrawGrid(assets);
-		for (auto& ob : objectHandler.Objects()) {
-			ob->DrawObject(assets);
-		}
+		ObjectRenderer::DrawAllObjects(objectHandler.Objects(), assets, grid);
 
 		overlay.DrawOverlay(assets, grid, Interacted());
 		
@@ -162,8 +161,7 @@ public:
 					if (objects[i]->type == EntityType::DOOR) {
 						objects[i]->Interact(0);
 					}
-
-					objects[i]->SetLife(objects[i]->GetMaxLife());
+					objects[i]->GetLifeSystem()->SetLife(objects[i]->GetLifeSystem()->GetMaxLife());
 
 					objects[i]->AnimateRotation(90, 1, Easing::OutBack);
 					objects[i]->AnimateTo(positions[j].position * grid.tile_size, 1, Easing::OutBack);
@@ -175,13 +173,12 @@ public:
 		}
 	}
 private:
-	bool changeScene = false;
 	std::function<std::unique_ptr<Scene>()> next_scene_factory;
 	void SetNextScene(SceneFactory sceneFactory) {
 		next_scene_factory = std::move(sceneFactory);
 	}
 	void GoToNextLevelOrWin() {
-		const int next = level_index++;
+		const int next = ++level_index;
 		if (next < LEVEL_COUNT)
 			SetNextScene([next] { return std::make_unique<LevelScene>(next); });
 		else
@@ -220,7 +217,7 @@ private:
 		int cx = (int)floorf(local.x / tileSize), cy = (int)floorf(local.y / tileSize);
 
 		for (auto& ob : objectHandler.Objects()) {
-			if (!ob->IsAlive() || !ob->IsInteractabe()) continue;
+			if (!ob->GetLifeSystem()->IsAlive() || !ob->IsInteractabe()) continue;
 
 			Vector2 p = ob->objectTransform.position;
 			if ((int)floorf(p.x / tileSize) == cx && (int)floorf(p.y / tileSize) == cy)
@@ -254,11 +251,10 @@ private:
 			{
 				auto& player = objectHandler.Spawn<PlayerController>(&grid, GREEN, 3);
 				player_ptr = &player; // Store the player ptr
-				player.on_die = [this]() {
+				player.GetLifeSystem()->on_die = [this]() {
 					SetNextScene([] {
 						return std::make_unique<GameOverScene>();
 						});
-					changeScene = true;
 					player_ptr = nullptr;
 					};
 				ob = &player;
@@ -267,7 +263,7 @@ private:
 			case EntityType::ENEMY:
 			{
 				auto& enemy = objectHandler.Spawn<EnemyController>(&grid, RED, 3);
-				enemy.on_die = [this]() { OnEnemyKilled(); };
+				enemy.GetLifeSystem()->on_die = [this]() { OnEnemyKilled(); };
 				enemies_alive++;
 				ob = &enemy;
 				break;
@@ -298,7 +294,7 @@ private:
 			case EntityType::DOOR:
 			{
 				auto& door = objectHandler.Spawn<DoorController>(&grid, BROWN, 1);
-				door.on_hit = [this]() { changeScene = true; GoToNextLevelOrWin(); };
+				door.on_hit = [this]() { GoToNextLevelOrWin(); };
 				ob = &door;
 				break;
 			}

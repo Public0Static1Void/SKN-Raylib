@@ -3,6 +3,7 @@
 #include <vector>
 #include <raylib.h>
 #include <string>
+#include <cmath>
 
 class Assets;
 
@@ -37,7 +38,7 @@ public:
 		return { 0, 0 };
 	}
 
-	Vector2 GetGridOffset() { return start_draw_position; }
+	const Vector2 GetGridOffset() const { return start_draw_position; }
 
 	Vector2 SnapToTile(Vector2 p) const {
 		return {
