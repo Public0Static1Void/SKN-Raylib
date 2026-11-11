@@ -90,4 +90,7 @@ vcpkg_installed/
 Testing/
 .cache/
 
+# Zips
+*.zip
+
 *~

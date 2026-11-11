@@ -113,6 +113,7 @@ public:
 
 		for (auto& ob : objectHandler.Objects())
 			ob->UpdateMovement(deltaTime);
+
 		objectHandler.EndTurn();
 	}
 
@@ -249,7 +250,7 @@ private:
 			switch (positions[i].type) {
 			case EntityType::PLAYER:
 			{
-				auto& player = objectHandler.Spawn<PlayerController>(&grid, GREEN, 3);
+				auto& player = objectHandler.Spawn<PlayerController>(&grid, 3);
 				player_ptr = &player; // Store the player ptr
 				player.GetLifeSystem()->on_die = [this]() {
 					SetNextScene([] {
@@ -262,7 +263,7 @@ private:
 			}
 			case EntityType::ENEMY:
 			{
-				auto& enemy = objectHandler.Spawn<EnemyController>(&grid, RED, 3);
+				auto& enemy = objectHandler.Spawn<EnemyController>(&grid, 3);
 				enemy.GetLifeSystem()->on_die = [this]() { OnEnemyKilled(); };
 				enemies_alive++;
 				ob = &enemy;
@@ -270,7 +271,7 @@ private:
 			}
 			case EntityType::CANNON:
 			{
-				auto& cannon = objectHandler.Spawn<CannonController>(&grid, YELLOW, 1);
+				auto& cannon = objectHandler.Spawn<CannonController>(&grid, 1);
 				cannon.SetInteractable(true);
 				cannon.on_shoot = [this]() { soundManager.PlayStoredSound(SoundManager::SHOOT); };
 				ob = &cannon;
@@ -278,7 +279,7 @@ private:
 			}
 			case EntityType::CRATE:
 			{
-				auto& crate = objectHandler.Spawn<CrateController>(&grid, BROWN, 1);
+				auto& crate = objectHandler.Spawn<CrateController>(&grid, 1);
 				crate.SetInteractable(true);
 				crate.on_hit = [this]() { soundManager.PlayStoredSound(SoundManager::SoundType::CRATE_HIT); };
 				ob = &crate;
@@ -286,14 +287,14 @@ private:
 			}
 			case EntityType::TARGET:
 			{
-				auto& target = objectHandler.Spawn<TargetController>(&grid, RED, 1);
+				auto& target = objectHandler.Spawn<TargetController>(&grid, 1);
 				target.on_hit = [this]() { objectHandler.InteractWithObject(EntityType::DOOR); };
 				ob = &target;
 				break;
 			}
 			case EntityType::DOOR:
 			{
-				auto& door = objectHandler.Spawn<DoorController>(&grid, BROWN, 1);
+				auto& door = objectHandler.Spawn<DoorController>(&grid, 1);
 				door.on_hit = [this]() { GoToNextLevelOrWin(); };
 				ob = &door;
 				break;

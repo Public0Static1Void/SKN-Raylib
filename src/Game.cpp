@@ -11,8 +11,8 @@ Game::Game(int width, int height, const char* title)
 Game::~Game()
 {
 	current_scene.reset(); // Releases the scene while the window is still open
-	CloseWindow();
 	CloseAudioDevice();
+	CloseWindow();
 }
 
 void Game::SetScene(std::unique_ptr<Scene> scene)

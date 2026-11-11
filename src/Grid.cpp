@@ -75,7 +75,7 @@ bool Grid::ScanLevel(const char* fileName)
 		}
 	}
 
-	int line_size = tiles[0].size();
+	size_t line_size = tiles[0].size();
 	if (start_draw_position.x > 0)
 		start_draw_position.x = start_draw_position.x - (line_size) * tile_size;
 	if (start_draw_position.y > 0)
@@ -86,16 +86,16 @@ bool Grid::ScanLevel(const char* fileName)
 
 void Grid::DrawGrid(const Assets& assets)
 {
-	int size = tiles.size();
+	size_t size = tiles.size();
 	if (size <= 0) return;
 
-	int line_size = tiles[0].size();
-	int start_x = start_draw_position.x;
-	int start_y = start_draw_position.y;
+	size_t line_size = tiles[0].size();
+	int start_x = static_cast<int>(start_draw_position.x);
+	int start_y = static_cast<int>(start_draw_position.y);
 
-	for (int i = 0; i < size; i++) {
+	for (size_t i = 0; i < size; i++) {
 		std::string line = tiles[i];
-		for (int j = 0; j < line.size(); j++) {
+		for (size_t j = 0; j < line.size(); j++) {
 			Sprite spr = Sprite::LAST_NO_USE;
 			switch (line[j]) {
 			case '1': 
@@ -112,11 +112,12 @@ void Grid::DrawGrid(const Assets& assets)
 		}
 		
 	}
+	/*
 	for (auto& p : searched_tiles) {
-		DrawCircle(p.x + start_draw_position.x, p.y + start_draw_position.y, 3, GREEN);
+		DrawCircle(p.x + start_x, p.y + start_y, 3, GREEN);
 	}
 	for (auto& p : path) {
-		DrawCircle(p.x + start_draw_position.x, p.y + start_draw_position.y, 3, YELLOW);
+		DrawCircle(p.x + start_x, p.y + start_y, 3, YELLOW);
 	}
-	
+	*/
 }

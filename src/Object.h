@@ -51,8 +51,8 @@ private:
 
 class Object {
 public:
-	Object(bool isPlayer, EntityType type, Grid* grid, Color drawColor, int max_life) 
-		: isPlayer(isPlayer), type(type), grid(grid), draw_color(drawColor), lifeSystem(max_life)
+	Object(bool isPlayer, EntityType type, Grid* grid, int max_life) 
+		: isPlayer(isPlayer), type(type), grid(grid), lifeSystem(max_life)
 	{}
 	virtual ~Object() = default;
 
@@ -197,7 +197,6 @@ public:
 protected:
 	Action current_action, queued_action;
 	Grid* grid;
-	Color draw_color;
 
 	Action SetUpActionType(Vector2 dir) {
 		Action ac;

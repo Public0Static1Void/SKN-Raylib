@@ -4,8 +4,8 @@
 class PlayerController : public Object {
 public:
 	// This class will always be the player
-	PlayerController(Grid* grid, Color drawColor, int max_life)
-		: Object(true, EntityType::PLAYER, grid, drawColor, max_life)
+	PlayerController(Grid* grid, int max_life)
+		: Object(true, EntityType::PLAYER, grid, max_life)
 	{
 		sprite = Sprite::PLAYER;
 	}
@@ -38,8 +38,8 @@ public:
 
 class EnemyController : public Object {
 public:
-	EnemyController(Grid* grid, Color drawColor, int max_life)
-		: Object(false, EntityType::ENEMY, grid, drawColor, max_life)
+	EnemyController(Grid* grid, int max_life)
+		: Object(false, EntityType::ENEMY, grid, max_life)
 	{
 		sprite = Sprite::ENEMY;
 	}
@@ -73,8 +73,8 @@ public:
 
 class TargetController : public Object {
 public:
-	TargetController(Grid* grid, Color drawColor, int max_life)
-		: Object(false, EntityType::TARGET, grid, drawColor, max_life) {
+	TargetController(Grid* grid, int max_life)
+		: Object(false, EntityType::TARGET, grid, max_life) {
 		sprite = Sprite::TARGET;
 	}
 
@@ -91,8 +91,8 @@ public:
 
 class DoorController : public Object {
 public:
-	DoorController(Grid* grid, Color drawColor, int max_life)
-		: Object(false, EntityType::DOOR, grid, drawColor, max_life) {
+	DoorController(Grid* grid, int max_life)
+		: Object(false, EntityType::DOOR, grid, max_life) {
 		sprite = Sprite::DOOR;
 	}
 

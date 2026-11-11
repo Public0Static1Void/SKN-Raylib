@@ -3,8 +3,8 @@
 
 class BulletController : public Object {
 public:
-	BulletController(Grid* grid, Color drawColor, int max_life, Vector2 move_direction)
-		: Object(false, EntityType::BULLET, grid, drawColor, max_life), move_direction(move_direction)
+	BulletController(Grid* grid, int max_life, Vector2 move_direction)
+		: Object(false, EntityType::BULLET, grid, max_life), move_direction(move_direction)
 	{
 		sprite = Sprite::BULLET;
 	}
@@ -35,8 +35,8 @@ private:
 };
 class CannonController : public Object {
 public:
-	CannonController(Grid* grid, Color drawColor, int max_life)
-		: Object(false, EntityType::CANNON, grid, drawColor, max_life)
+	CannonController(Grid* grid, int max_life)
+		: Object(false, EntityType::CANNON, grid, max_life)
 	{
 		sprite = Sprite::CANNON;
 	}
@@ -49,7 +49,7 @@ public:
 			if (current_cooldown <= 0) {
 				// Spawn bullet
 				Vector2 move_dir = ObjectTransform::DirFromRotation(objectTransform.rotation);
-				auto& bullet = objectHandler.Spawn<BulletController>(grid, draw_color, 1, move_dir);
+				auto& bullet = objectHandler.Spawn<BulletController>(grid, 1, move_dir);
 				bullet.SetPosition(objectTransform.position + move_dir * (grid->tile_size / 2));
 				bullet.AnimateTo(objectTransform.position + move_dir * grid->tile_size, 0.5f, Easing::OutQuad);
 				bullet.AnimateSize({ (float)grid->tile_size, (float)grid->tile_size }, 0.25f, Easing::OutBack);
@@ -78,8 +78,8 @@ private:
 };
 class CrateController : public Object {
 public:
-	CrateController(Grid* grid, Color drawColor, int max_life)
-		: Object(false, EntityType::CRATE, grid, drawColor, max_life)
+	CrateController(Grid* grid, int max_life)
+		: Object(false, EntityType::CRATE, grid, max_life)
 	{
 		sprite = Sprite::CRATE;
 	}

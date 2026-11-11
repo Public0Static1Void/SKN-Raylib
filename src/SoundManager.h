@@ -17,9 +17,10 @@ public:
 		}
 	}
 	bool InitSounds() {
-		bool allLoaded = false;
+		bool allLoaded = true;
 		for (size_t i = 0; i < SoundType::LAST_NO_USE; i++) {
-			allLoaded = sounds[i].LoadFile(FILES[i].fileName, FILES[i].isMusic);
+			if (!sounds[i].LoadFile(FILES[i].fileName, FILES[i].isMusic))
+				allLoaded = false;
 		}
 		return allLoaded;
 	}

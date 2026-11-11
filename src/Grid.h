@@ -48,10 +48,11 @@ public:
 	}
 
 	bool IsWalkable(Vector2 position, bool terrestrial = true) {
-		Vector2 stored_pos = position;
-		position = { position.x / tile_size, position.y / tile_size };
-		if (position.y >= tiles.size() || position.y < 0 || position.x >= tiles[position.y].size() || position.x < 0) return false;
-		const char tile = tiles[position.y][position.x];
+		int x = static_cast<int>(position.x / tile_size);
+		int y = static_cast<int>(position.y / tile_size);
+
+		if (y >= tiles.size() || y < 0 || x >= tiles[y].size() || x < 0) return false;
+		const char tile = tiles[y][x];
 		if (terrestrial)
 			return tile != '1' && tile != 'H';
 		else

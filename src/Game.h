@@ -1,10 +1,6 @@
 #pragma once
 #include "Scene.h"
 
-struct GameState {
-
-};
-
 class Game
 {
 public:

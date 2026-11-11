@@ -10,16 +10,13 @@ namespace ObjectRenderer {
 	inline void DrawObject(const Object& ob, const Assets& assets, const Grid& grid) {
 		if (!ob.GetLifeSystem()->IsAlive() || !ob.GetCanRender()) return;
 
-
 		const ObjectTransform& transform = ob.objectTransform;
-
 		Rectangle dest = {
 			transform.position.x + (grid.tile_size - transform.size.x) / 2.0f,
 			transform.position.y + (grid.tile_size - transform.size.y) / 2.0f,
 			transform.size.x, transform.size.y
 		};
 
-		//DrawRectangle(pos.x, pos.y, size.x, size.y, draw_color);
 		DrawSprite(assets.tilemap, ob.GetSprite(), dest, (float)transform.rotation);
 	}
 
