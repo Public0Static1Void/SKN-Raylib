@@ -3,6 +3,7 @@ project(SKN-raylib LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 include(FetchContent)
@@ -25,3 +26,6 @@ add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:skn>/assets)
 add_dependencies(skn copy_assets)
+
+install(TARGETS skn RUNTIME DESTINATION . COMPONENT game)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/assets DESTINATION . COMPONENT game)
