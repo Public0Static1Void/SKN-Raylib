@@ -161,7 +161,7 @@ public:
 		}
 	}
 
-	void SetInteractable(bool in) { is_interactable = in; moves_left = AVALIABLE_MOVES; }
+	void SetInteractable(bool in) { is_interactable = in; moves_left = AVAILABLE_MOVES; }
 	bool IsInteractabe() { return is_interactable; }
 
 	void SetMoves(int moves) { moves_left = moves; }
@@ -188,7 +188,7 @@ public:
 	bool isPlayer = false;
 	EntityType type;
 
-	static constexpr int AVALIABLE_MOVES = 3;
+	static constexpr int AVAILABLE_MOVES = 3;
 
 	std::function<void()> on_hit, on_move, on_rotate;
 

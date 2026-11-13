@@ -30,6 +30,8 @@ public:
 	explicit LevelScene(int level_index) : level_index(level_index) {}
 
 	bool Start() override {
+		// Check that the level index is correct
+		if (level_index < 0 || level_index >= LEVEL_COUNT) return false;
 		// Load the tileset
 		if (!assets.Load("assets/sprites/tilemap.png")) return false;
 		// Load all the sounds
@@ -73,6 +75,8 @@ public:
 		RestartScene(positions);
 
 		InitUI();
+
+		camera = MakeFitCamera(grid.GetBounds());
 
 		return true;
 	}
@@ -119,7 +123,6 @@ public:
 
 	void Render() override {
 		DrawFPS(0, 0);
-		camera = MakeFitCamera(grid.GetBounds());
 		
 		BeginMode2D(camera);
 		grid.DrawGrid(assets);
@@ -141,12 +144,17 @@ public:
 		// Respawn all the dead objects
 		std::vector<Grid::ObjectPosition> to_spawn;
 		std::vector<std::unique_ptr<Object>>& objects = objectHandler.Objects();
+		// Reset the enemy count
+		enemies_alive = 0;
+		// If an object is dead and on the list spawn it
 		for (int i = 0; i < positions.size(); i++) {
 			bool alive = false;
 			for (auto& ob : objects)
 				if (positions[i].type == ob->type) alive = true;
 
 			if (!alive) to_spawn.push_back(positions[i]);
+			if (positions[i].type == EntityType::ENEMY)
+				enemies_alive++;
 		}
 		SpawnObjectsFromPositions(to_spawn);
 		objectHandler.EndTurn();
@@ -158,7 +166,7 @@ public:
 				if (positions[j].type == objects[i]->type) {
 					// Restore the avaliable moves on interactable objects
 					if (objects[i]->IsInteractabe())
-						objects[i]->SetMoves(Object::AVALIABLE_MOVES);
+						objects[i]->SetMoves(Object::AVAILABLE_MOVES);
 					if (objects[i]->type == EntityType::DOOR) {
 						objects[i]->Interact(0);
 					}
@@ -238,7 +246,7 @@ private:
 	int enemies_alive = 0;
 	void OnEnemyKilled() {
 		// If the level goal is to kill all the enemies it will open the door when they are killed
-		if (--enemies_alive > 0) return;
+		if (--enemies_alive > 0 || level_index < 0 || level_index >= LEVEL_COUNT) return;
 		if (LEVELS_INFO[level_index].goal == LevelGoal::KILL_ENEMIES) {
 			objectHandler.InteractWithObject(EntityType::DOOR);
 		}
